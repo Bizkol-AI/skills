@@ -1,0 +1,28 @@
+# Per-developer Claude Code state
+.claude/settings.local.json
+
+# Client / brand working directories — these contain customer data and
+# should never be committed. The plugin generates them at runtime.
+clients/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+id_rsa*
+credentials
+credentials.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*~

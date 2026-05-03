@@ -1,0 +1,32 @@
+{
+  "name": "bizkol-skills",
+  "owner": {
+    "name": "Bizkol AI",
+    "url": "https://bizkol.ai"
+  },
+  "metadata": {
+    "description": "Bizkol marketing toolbox — KOL campaigns + full-funnel marketing intelligence for agencies and direct merchants.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "bizkol",
+      "source": "./",
+      "description": "KOL/influencer campaign management, creator discovery, outreach, SEO/GEO audits, competitor research, Shopify commerce review, brand voice, content creation, campaign planning, and email sequences. Deeply integrated with the Bizkol MCP (mcp.bizkol.ai).",
+      "category": "marketing",
+      "keywords": [
+        "bizkol",
+        "kol",
+        "influencer-marketing",
+        "creator-marketing",
+        "campaign-management",
+        "seo",
+        "geo",
+        "competitor-analysis",
+        "reporting",
+        "gtm-strategy",
+        "voice-of-customer"
+      ]
+    }
+  ]
+}
