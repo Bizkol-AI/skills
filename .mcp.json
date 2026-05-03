@@ -10,7 +10,7 @@
     },
     "windsor": {
       "type": "http",
-      "url": "https://mcp.windsor.ai/mcp"
+      "url": "https://mcp.windsor.ai"
     },
     "canva": {
       "type": "http",
