@@ -73,7 +73,7 @@ The plugin's `.mcp.json` wires up four MCP servers out of the box. Only `bizkol`
 |-----|----------|----------|
 | **`bizkol`** (`mcp.bizkol.ai/api/mcp`) | ✅ Required | KOL discovery, campaign creation, outreach, performance — every KOL workflow |
 | **`shopify`** (`setup.shopify.com/mcp`) | Optional | Merchant store data — orders, products, customers, sales, inventory — powers `/shopify-review` |
-| **`windsor`** (`mcp.windsor.ai/mcp`) | Optional | Paid media performance — Google Ads, Meta Ads, GA4, GSC, GBP, Merchant — unified `get_data` tool. Falls back to Chrome → respective platform UI when not connected. |
+| **`windsor`** (`mcp.windsor.ai`) | Optional | Paid media performance — Google Ads, Meta Ads, GA4, GSC, GBP, Merchant — unified `get_data` tool. Falls back to Chrome → respective platform UI when not connected. |
 | **`semrush`** (`mcp.semrush.com/v1/mcp`) | Optional | SEO + competitor intelligence — keywords, domain analytics, backlinks, SERP |
 | **`canva`** (`mcp.canva.com/mcp`) | Optional | Creative asset generation — social graphics, ad creative |
 

@@ -5,7 +5,7 @@ This plugin ships with five MCP servers wired into `.mcp.json`. Bizkol is the on
 | MCP | Required | URL | Used for |
 |-----|----------|-----|----------|
 | `bizkol` | ✅ | `https://mcp.bizkol.ai/api/mcp` | KOL discovery, campaigns, outreach, performance, social lookups, Reddit VoC |
-| `windsor` | Optional | `https://mcp.windsor.ai/mcp` | Owned analytics — GA4, GSC, Google Ads, Meta Ads, GBP, Merchant |
+| `windsor` | Optional | `https://mcp.windsor.ai` | Owned analytics — GA4, GSC, Google Ads, Meta Ads, GBP, Merchant |
 | `shopify` | Optional | `https://setup.shopify.com/mcp` | Commerce data — orders, products, customers, sales, inventory |
 | `semrush` | Optional | `https://mcp.semrush.com/v1/mcp` | SEO + competitor intelligence — keywords, traffic, backlinks, content gaps |
 | `canva` | Optional | `https://mcp.canva.com/mcp` | Creative asset generation |
@@ -92,7 +92,7 @@ For anything KOL-related, **always use Bizkol MCP first** — `search_kols`, `im
 
 ## Windsor.ai — owned analytics (OPTIONAL)
 
-**URL:** `https://mcp.windsor.ai/mcp`
+**URL:** `https://mcp.windsor.ai`
 Windsor.ai unifies the **client's / merchant's own** performance data across Google and Meta platforms behind a single `get_data` tool.
 
 **Critical rule — Windsor is for OWNED data only:**
