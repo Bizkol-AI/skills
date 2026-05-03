@@ -15,6 +15,8 @@ A Claude Code / Cowork plugin that turns Claude into a marketing strategist for 
 
 This plugin lives at **<https://github.com/Bizkol-AI/skills>** and follows the [Claude Code plugin spec](https://docs.claude.com/en/docs/claude-code/plugins). Two install paths depending on whether you want to track upstream updates or hack on the plugin locally.
 
+![Installing the Bizkol plugin in Claude](assets/install-demo.webp)
+
 ### Option 1 — Install from the marketplace (recommended)
 
 Inside Claude Code, add the Bizkol marketplace and install the plugin:
