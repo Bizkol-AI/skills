@@ -36,7 +36,8 @@ Two jobs that share the same backbone: **answering the GTM question** for an ide
 
 Six steps, in order:
 
-1. **Guided Q&A** — ask only what's missing; pull anything available from the user's existing materials first.
+0. **Pre-research from URL** — if the user passed a URL (`/new-client https://acme.com`), WebFetch the homepage + likely subpages (`/about`, `/pricing`, `/contact`, `/team`, `/blog`), inspect for tech signals (Shopify, GA4, Pixel, Klaviyo), and run parallel WebSearch queries (`"<brand>" review`, `"<brand>" alternative`, `"<brand>" funding`, etc.) to surface VoC, competitors, and stage. Pre-fill the brief and present a research summary so the interview only asks for what couldn't be found.
+1. **Guided Q&A** — fill the gaps left by Step 0. Confirm inferred fields in a single batched check; only ask fresh questions for things research can't answer (goals, budget, baselines, account IDs, special instructions).
 2. **Generate `client-brief.md`** using the template in `references/client-brief-template.md`.
 3. **Create the folder structure** (see "Folder Output" below).
 4. **Initial audit** — light-touch SEO + competitor + social baseline so the team has a starting picture.
@@ -66,7 +67,7 @@ A brief is "good enough" when it has at minimum:
 - Active channels (with priority order)
 - Windsor account IDs per platform (GA4, GSC, Google Ads, etc.)
 - Bizkol account / KOL campaign goals (if KOL is a channel)
-- Reporting cadence + delivery channel
+- Reporting focus + meeting cadence (no delivery field — reports land in `/clients/[name]/`)
 - Forbidden words / claims / topics
 
 Anything missing → flag in the brief with `TBD: [field]` rather than skipping.

@@ -1,6 +1,6 @@
 ---
-description: Onboard a new client — guided Q&A, brief generation, folder setup, initial audit. Run this BEFORE any other client-scoped command.
-argument-hint: [client-name]
+description: Onboard a new client — pre-research from URL if provided, guided Q&A for what's missing, brief generation, folder setup, initial audit. Run this BEFORE any other client-scoped command.
+argument-hint: [client-name-or-url]
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch, AskUserQuestion, TodoWrite, Task
 ---
 
@@ -10,21 +10,67 @@ Read the marketing-framework skill and `${CLAUDE_PLUGIN_ROOT}/skills/gtm-researc
 
 > **This command is the prerequisite for every other client-scoped command** (`/seo-audit`, `/competitor-scan`, `/shopify-review`, `/kol-campaign`, `/kol-discovery`, `/kol-outreach`, `/kol-performance`, `/campaign-plan`, `/draft-content`, `/email-sequence`, `/brand-review`). Without `/clients/[name]/client-brief.md`, those commands stop and ask the user to run `/new-client` first.
 
-Onboard a new client named "$ARGUMENTS". Follow the steps in order.
+Onboard a new client. The argument "$ARGUMENTS" may be a name (`acme`), a URL (`https://acme.com`), or both (`acme https://acme.com`). Follow the steps in order.
 
-## Step 1: Guided Interview
+## Step 0: Parse Argument and Pre-Research from URL
 
-Use AskUserQuestion to walk the user through the onboarding questions defined in `${CLAUDE_PLUGIN_ROOT}/skills/gtm-research/references/client-brief-template.md`. Ask in batches of 2-4 — never dump all questions at once. Wait for answers before proceeding.
+Parse "$ARGUMENTS":
 
-Key batches:
-1. Business basics (type, website URL, platform, location)
-2. What they sell (products/services, price points, target customer)
-3. Business goals (90-day goal, north star metric, current baseline numbers)
-4. Marketing history (active channels, budget, what worked/didn't)
-5. Competitors (known competitor names and URLs)
-6. Brand & positioning (tagline, tone, self-description)
-7. Tech & tracking (GA4 Property ID, GSC property URL, Meta Pixel, email platform, Semrush project, Shopify store URL if merchant)
-8. **Windsor account mapping** — Identify the client's Windsor account IDs (if Windsor is connected). Walk the user through finding each one if they're unsure:
+- **If a URL is present** (anything matching `https?://...` or a bare domain like `acme.com`):
+  1. Derive the **client slug** from the registrable domain (e.g., `bizkol.ai` → `bizkol`, `acme-corp.com` → `acme-corp`). Strip `www.`, the TLD, and any path. Use this as `[client-name]` for the folder; confirm it with the user at the end of pre-research before writing files.
+  2. **Research the site and the company on the open web** to pre-fill as much of the brief as possible. The goal is to minimize the questions the client must answer.
+     - **WebFetch** the homepage. Extract: business name, tagline, one-line description, primary product/service, pricing tiers if visible, target audience signals, contact info, geographic footprint.
+     - **WebFetch** likely pages: `/about`, `/pricing`, `/products`, `/services`, `/contact`, `/team`, `/blog`, `/case-studies`, `/customers`. Skip silently if 404.
+     - Inspect the homepage HTML/text for **tech signals**: Shopify (`cdn.shopify.com`, `myshopify.com`), Webflow, WordPress, Klaviyo (`klaviyo.com/onsite`), Mailchimp, GA4 (`G-XXXXXXX`), Meta Pixel (`fbq(`), Google Ads tag (`AW-`).
+     - **WebSearch** queries to round out context (run 3–6 in parallel):
+       - `"<brand>" review` / `"<brand>" reddit` (VoC + reputation signals)
+       - `"<brand>" alternative` / `"<brand>" vs` (competitor surfaces)
+       - `"<brand>" funding` / `"<brand>" crunchbase` (stage signals)
+       - `"<brand>" pricing`
+       - `site:linkedin.com/company "<brand>"` (size, headcount, location)
+       - `site:trustpilot.com OR site:g2.com "<brand>"` (reviews — useful for VoC seed)
+     - If browser automation is available **and** the homepage is JS-heavy (sparse WebFetch text), use Chrome to fetch the rendered page; note "rendered via Chrome" in the research log.
+  3. Save **everything you found** to `/clients/[client-slug]/raw-data/voc/onboarding-research-[YYYY-MM-DD].md` and `/clients/[client-slug]/raw-data/competitor/competitor-list-from-search-[YYYY-MM-DD].md` (the latter for competitor candidates surfaced via "alternatives" / "vs" searches). Create the folder structure (Step 3) early so these files have a home.
+  4. **Draft a pre-filled brief** using everything inferred from research. Mark each field with its source: `[from website]`, `[from search]`, `[inferred]`, or `[needs confirmation]`.
+  5. **Show the user a research summary** before asking anything: what you found, what you inferred, what's still missing. Format:
+     ```
+     I researched [Brand] at [URL]. Here's what I gathered:
+
+     ✅ Found
+     - Business name, tagline, one-line description
+     - Primary offering: [...]
+     - Pricing visible: [...]
+     - Tech detected: [Shopify | GA4 G-XXX | Meta Pixel | Klaviyo | ...]
+     - Likely competitors (from "alternatives" search): [...]
+     - Reviews / VoC signals: [...]
+
+     🔎 Inferred (please confirm)
+     - Target customer: [...]
+     - Tone: [...]
+     - Stage: [...]
+
+     ❓ Still need from you
+     - 90-day goal + north star metric
+     - Current baseline numbers (revenue, sessions, orders/leads, conversion rate)
+     - Monthly marketing budget
+     - Windsor account IDs (GA4, GSC, Google Ads, Meta Ads, GBP, Merchant)
+     - Tracked keyword list
+     - Special instructions
+     ```
+
+- **If only a name is provided** (no URL): skip pre-research and go straight to Step 1. Ask for the website URL in Batch 1; once you have it, you may run pre-research before continuing the rest of the interview.
+
+## Step 1: Guided Interview — Ask Only What's Missing
+
+Use AskUserQuestion to fill the gaps left after Step 0. **Do not re-ask anything pre-research already answered confidently** — instead, present those values for confirmation in a single batched check ("I found these — anything to correct?"). Ask in batches of 2–4. Wait for answers before proceeding.
+
+Order, in priority of "almost always needs the client":
+1. **Business goals** — 90-day goal, north star metric, current baseline numbers (revenue, sessions, orders/leads, conversion rate). *Almost never on the website.*
+2. **Marketing budget + history** — monthly budget, what's worked, what hasn't. *Internal knowledge.*
+3. **Confirm inferred fields** — single batch: target customer, tone, stage, primary offering, pricing tiers, top competitors. Show what you inferred; ask for corrections.
+4. **Competitors not surfaced by search** — "Anyone we should add or remove?"
+5. **Tech & tracking** — GA4 Property ID, GSC verification status, Meta Pixel installed?, email platform + list size, Semrush project + tracked-keyword count, Shopify store URL (if merchant). Pre-fill anything detected on the site (e.g., GA4 ID from page source) and ask for confirmation.
+6. **Windsor account mapping** — IDs the client must look up themselves:
    - GA4 Account ID — <https://onboard.windsor.ai?datasource=googleanalytics4>
    - GSC Account ID — `sc-domain:example.com` or full URL property; <https://onboard.windsor.ai?datasource=searchconsole>
    - Google Ads Account ID — typically `XXX-XXX-XXXX`; <https://onboard.windsor.ai?datasource=google_ads>
@@ -32,10 +78,11 @@ Key batches:
    - Google Business Profile Account ID — <https://onboard.windsor.ai?datasource=google_my_business>
    - Google Merchant Center Account ID — <https://onboard.windsor.ai?datasource=google_merchant>
    - **If Windsor is not connected**, note this in the brief — owned-data sections will fall back to Chrome on the respective platform UIs.
-9. **Bizkol account check** — Confirm the user has signed in at <https://bizkol.ai>. If they haven't run a Bizkol command yet, mention the OAuth flow will trigger on first use.
-10. **Shopify check (merchant only)** — If they sell on Shopify, note the store URL and whether the Shopify MCP is connected at <https://setup.shopify.com/mcp>.
-11. Reporting preferences (delivery method, what they care about, meeting cadence)
-12. Tracked keywords list and special instructions
+7. **Bizkol account check** — Confirm the user has signed in at <https://bizkol.ai>. If they haven't run a Bizkol command yet, mention the OAuth flow will trigger on first use.
+8. **Shopify check (merchant only)** — If they sell on Shopify, confirm the store URL and whether the Shopify MCP is connected at <https://setup.shopify.com/mcp>.
+9. **Reporting focus + cadence** — what the client most cares about seeing in reports, and meeting cadence (weekly / biweekly / monthly). *Reports always land in `/clients/[name]/audits/` and `/plans/`; do not ask about delivery method — there isn't one.*
+10. **Tracked keyword list** — the 20–50 keywords to monitor in Semrush (seed from research if you found ranked keywords; ask for additions).
+11. **Special instructions** — anything client-specific (forbidden words, claim rules, embargoes).
 
 ## Step 2: Generate Client Brief
 

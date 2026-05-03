@@ -8,6 +8,8 @@ This is the master context file created by `/new-client`. It lives at `/clients/
 
 When running `/new-client`, ask the user these questions using AskUserQuestion tool, grouped into logical batches of 2-4 questions at a time. Do not dump all questions at once.
 
+> **Research-first rule.** If the user provided a URL with `/new-client` (e.g. `/new-client https://acme.com`), pre-research the site and the company on the open web (WebFetch + WebSearch, optionally Chrome) **before** asking anything. Pre-fill every field you can confidently infer and present them as a confirmation batch ("here's what I found — anything to correct?"). Only ask the questions whose answers can't be found on the site or via search. The lists below are the **full superset**; the actual interview should be the gap-filling subset.
+
 ### Batch 1: Business Basics
 - Business name
 - Website URL
@@ -58,10 +60,11 @@ Map the client's platforms to Windsor.ai connected accounts. Show the user the a
 - **Google Business Profile Account:** Select or "Not connected" (connect at: https://onboard.windsor.ai?datasource=google_my_business)
 - **Google Merchant Account:** Select or "Not connected" (connect at: https://onboard.windsor.ai?datasource=google_merchant)
 
-### Batch 9: Reporting Preferences
-- Report delivery preference: email / Slack / folder only
-- What the client cares most about seeing in reports
+### Batch 9: Reporting Focus
+- What the client cares most about seeing in reports (focus areas / KPIs)
 - Meeting cadence: weekly / biweekly / monthly
+
+> Reports always land in `/clients/[name]/audits/` and `/plans/`. Do not ask about delivery method — the toolbox writes files to that folder and nothing else.
 
 ### Batch 10: Cowork Configuration
 - Tracked keywords list (the 20-50 keywords to monitor in Semrush)
@@ -141,7 +144,6 @@ After collecting answers, generate `client-brief.md` in this exact format:
 - **Google Merchant Account ID:** [ID or "Not connected"]
 
 ## Reporting
-- **Delivery:** [PREFERENCE]
 - **Client cares about:** [WHAT MATTERS MOST]
 - **Meeting cadence:** [FREQUENCY]
 
