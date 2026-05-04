@@ -76,11 +76,12 @@ The Bizkol MCP itself is identical in both modes.
 11. The shortlist now lives in Bizkol — confirm via `get_campaign_kols`. Optionally export a snapshot to `/clients/[name]/audits/kol-discovery-[topic]-[YYYY-MM-DD].md`.
 
 ### Outreach Tracking
-- `list_email_conversations` for the campaign → flag threads awaiting reply.
-- `get_email_conversation` for thread detail when drafting follow-ups.
-- Sending happens in the Bizkol web UI; this skill reads state, drafts copy.
-- Drafts saved to `/clients/[name]/content/drafts/outreach-[campaign]-[YYYY-MM-DD].md`.
-- Outreach review summary saved to `/clients/[name]/audits/kol-outreach-[campaign]-[YYYY-MM-DD].md` if generated.
+- `/kol-outreach [client] [campaign]` is the single stateful command for the email inbox of a campaign. Idempotent — safe to run ad-hoc or daily.
+- Paginates `list_email_conversations` to handle 500+ KOL campaigns; only fetches `get_email_conversation` bodies for threads with new inbound since the last run.
+- Persistent state at `/clients/[name]/raw-data/kol/outreach-state-[campaign-slug].json` tracks per-thread `lastDraftedForMessageId`, `draftStatus` (`pending_send | sent | superseded | skipped`), and `decision` (`negotiating | agreed | declined | no_response`) — so reruns only redraft when the inbound has actually advanced.
+- Drafts → `/clients/[name]/content/drafts/outreach-[campaign-slug]-[YYYY-MM-DD].md`.
+- Review report → `/clients/[name]/audits/kol-outreach-[campaign-slug]-[YYYY-MM-DD].md`.
+- Sending always happens in Bizkol's UI; this skill never sends. Pair with `/schedule` for a daily cron.
 
 ### Performance Review
 - `get_campaign_kols` for the per-KOL roster — status, `socialHandles`, `quotes`. This is the spine of the report.
@@ -119,5 +120,5 @@ When Bizkol MCP doesn't cover a surface (e.g., LinkedIn creators, Pinterest acco
 
 - `/kol-discovery` — topic/handle-driven creator search
 - `/kol-campaign` — end-to-end campaign workflow (writes the strategic brief, calls `create_campaign`, updates the index)
-- `/kol-outreach` — outreach inbox triage and follow-up drafting
+- `/kol-outreach` — stateful email inbox triage for a campaign at scale (500+ KOLs); incremental drafts with per-thread state, idempotent on any cadence
 - `/kol-performance` — per-KOL roster + posts pull, aggregated client-side into a dashboard view + analysis

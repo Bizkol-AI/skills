@@ -13,11 +13,66 @@ A Claude Code / Cowork plugin that turns Claude into a marketing strategist for 
 
 ## Install
 
-This plugin lives at **<https://github.com/Bizkol-AI/skills>** and follows the [Claude Code plugin spec](https://docs.claude.com/en/docs/claude-code/plugins). Two install paths depending on whether you want to track upstream updates or hack on the plugin locally.
+This repo lives at **<https://github.com/Bizkol-AI/skills>**. Pick the install path for the surface you use:
 
-![Installing the Bizkol plugin in Claude](assets/install-demo.webp)
+- **[Claude Desktop](#install-on-claude-desktop)** — **Recommended.** Skills + MCP servers, driven by natural-language prompts. The default surface for marketing teams.
+- **[Claude Code](#install-on-claude-code)** — Power-user path: adds `/kol-campaign`, `/kol-outreach`, etc. **slash commands** on top of the skills + MCP. Use this if you live in the terminal or an IDE.
 
-### Option 1 — Install from the marketplace (recommended)
+Either path works on its own. If you use both, install on each independently.
+
+---
+
+### Install on Claude Desktop
+
+Claude Desktop (the standalone app at <https://claude.ai/download>) is the recommended surface for most marketing users. The plugin installs through Claude's **Cowork** marketplace — a few clicks, no JSON config, no terminal.
+
+![Installing the Bizkol plugin in Claude Desktop](assets/install-demo.webp)
+
+#### Step 1 — Add the Bizkol marketplace
+
+1. Download and install Claude Desktop from <https://claude.ai/download>.
+2. Open the **Cowork** tab.
+3. Click the **Customize** tab.
+4. Under **Personal Plugins**, click the **+** sign.
+5. Select **Create plugin** → **Add marketplace**.
+6. Paste the GitHub URL and confirm:
+
+   ```
+   https://github.com/Bizkol-AI/skills.git
+   ```
+
+#### Step 2 — Install the Bizkol plugin
+
+1. In the **Directory**, select **Personal Plugins**.
+2. Open the **Skills** tab.
+3. Install the **Bizkol** plugin.
+
+#### Step 3 — Connect the MCP connectors
+
+After the plugin is installed, click **Connector** under Bizkol and authorize the integrations:
+
+- **`bizkol`** — ✅ Required. Powers every KOL workflow.
+- **`shopify`**, **`windsor`**, **`semrush`**, **`canva`** — Optional, but strongly recommended. Each one unlocks more analysis surface (commerce data, paid/owned analytics, SEO, creative). See [Bundled connectors](#bundled-connectors) for what each one does.
+
+Each connector authorizes independently via OAuth on first use — sign in at <https://bizkol.ai> first if you haven't.
+
+#### Step 4 — Use it
+
+In a Desktop chat, describe what you want in plain language. The skills route the request:
+
+> "Onboard a new client at acme.com — run pre-research, draft the brief, set up the folder structure."
+
+> "Pull the email inbox for the Acme Spring campaign — show me what came in today and draft replies."
+
+Output files (briefs, audits, drafts) write to the `/clients/[client-name]/` folder Claude has filesystem access to.
+
+---
+
+### Install on Claude Code
+
+[Claude Code](https://docs.claude.com/en/docs/claude-code/plugins) gets you everything Desktop does, **plus** the `/kol-campaign`, `/kol-outreach`, `/competitor-scan`, … slash commands, and one-shot install/update via the plugin marketplace.
+
+#### Option 1 — Install from the marketplace (recommended)
 
 Inside Claude Code, add the Bizkol marketplace and install the plugin:
 
@@ -27,7 +82,7 @@ Inside Claude Code, add the Bizkol marketplace and install the plugin:
 /reload-plugins
 ```
 
-Then verify it loaded:
+Verify it loaded:
 
 ```shell
 /plugin
@@ -42,7 +97,9 @@ To update later:
 /reload-plugins
 ```
 
-### Option 2 — Local development (`--plugin-dir`)
+This works across every Claude Code surface — CLI, desktop app, web app, and the IDE extensions (VS Code, JetBrains).
+
+#### Option 2 — Local development (`--plugin-dir`)
 
 If you've cloned the repo and want to test changes without going through the marketplace:
 
@@ -53,7 +110,7 @@ claude --plugin-dir ./skills
 
 In this mode skills are loaded directly from your working copy, and `/reload-plugins` picks up edits without restarting Claude.
 
-### After install — connect Bizkol MCP
+#### Connect Bizkol MCP
 
 The plugin ships with `.mcp.json` pointing at `https://mcp.bizkol.ai/api/mcp`. The first time you run a Bizkol command, Claude triggers the OAuth flow in your browser — one click and you're in. Sign in or create an account at <https://bizkol.ai> first if you haven't already.
 
@@ -93,7 +150,7 @@ See [CONNECTORS.md](CONNECTORS.md) for tool-by-tool reference.
 
 - **`/kol-campaign [campaign-name]`** — End-to-end KOL campaign workflow: create the Bizkol campaign, search for relevant creators, shortlist, import by handle, track performance.
 - **`/kol-discovery [topic or brand]`** — Discover creators on Instagram, TikTok, YouTube, or X by topic, follower range, and engagement rate. Returns shortlist with social handles and sample content.
-- **`/kol-outreach [campaign-name]`** — Manage email outreach to shortlisted KOLs: list active threads, surface awaiting-reply conversations, draft follow-ups.
+- **`/kol-outreach [client-name] [campaign-name]`** — Manage email outreach for a campaign. Pulls every conversation (paginated, scales to 500+ KOLs), drafts replies for new inbound since the last run, and persists per-thread state so reruns only act on net-new activity. Idempotent — safe to run ad-hoc or on a daily cron via `/schedule`.
 - **`/kol-performance [campaign-name]`** — Pull the campaign's per-KOL roster and posts via Bizkol, then aggregate client-side into a dashboard view: totals, platform breakdown, top posts, underperformers, per-KOL performance.
 
 ### Client / brand management

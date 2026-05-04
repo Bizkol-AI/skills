@@ -137,8 +137,9 @@ After the folder is set up, run a light-touch initial audit using the data in `c
    - Save raw to `/clients/[name]/raw-data/seo/`.
    - *If Semrush not connected:* skip and note "SEO audit skipped — connect Semrush to enable. Run `/seo-audit $ARGUMENTS` later."
 
-2. **Competitor Analysis** — Semrush domain comparison for each competitor; Chrome → Meta Ad Library spot-check; competitor website visit.
-   - Save raw to `/clients/[name]/raw-data/competitor/` and `/raw-data/paid/` (ad library).
+2. **Competitor Snapshot (light scan)** — Semrush domain comparison across the seed list; Chrome → Meta Ad Library spot-check; competitor website visit. This is a single-file snapshot, not a per-competitor teardown.
+   - Save to `/clients/[name]/raw-data/competitor/competitor-snapshot-[YYYY-MM-DD].md` (one file covering the seed list) and `/raw-data/paid/` (ad library captures).
+   - Full per-competitor teardowns (`competitor-deep-dive-[competitor]-*.md`) are produced by `/competitor-scan`, not here. If the user wants a real teardown during onboarding, point them to `/competitor-scan` as a follow-up.
 
 3. **GA4 Baseline (Windsor → Chrome fallback)** — `get_data` with connector `googleanalytics4`:
    - Fields: `date`, `sessions`, `users`, `conversions`, `totalrevenue`, `default_channel_group`, `landing_page`

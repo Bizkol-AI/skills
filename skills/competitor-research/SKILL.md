@@ -90,8 +90,10 @@ See `references/reddit-research-methodology.md` for subreddit sourcing, query pa
 /clients/[client-name]/
   /raw-data/
     /competitor/
-      competitor-list.md
-      competitor-deep-dive-[competitor]-[YYYY-MM-DD].md
+      competitor-list-from-search-[YYYY-MM-DD].md   # seed candidates from /new-client Step 0
+      competitor-list.md                            # confirmed seed list (curated)
+      competitor-snapshot-[YYYY-MM-DD].md           # light scan from /new-client Step 4.2
+      competitor-deep-dive-[competitor]-[YYYY-MM-DD].md  # per-competitor teardown — /competitor-scan only
     /paid/
       ad-library-data-[competitor]-[YYYY-MM-DD].md
     /voc/
@@ -102,6 +104,11 @@ See `references/reddit-research-methodology.md` for subreddit sourcing, query pa
     competitor-scan-[YYYY-MM-DD].md
     voc-research-[topic]-[YYYY-MM-DD].md
 ```
+
+**Filename boundaries** — keep these distinct so onboarding doesn't oversell its output:
+- `competitor-list-from-search-*` and `competitor-list.md` — seed lists (from `/new-client`).
+- `competitor-snapshot-*` — light scan over the seed list (from `/new-client` Step 4.2). One file, not per-competitor.
+- `competitor-deep-dive-[competitor]-*` — full battlecard-style teardown, one file per competitor. **Only `/competitor-scan` produces these.** Do not use this filename during onboarding.
 
 ## Audience Modes
 
