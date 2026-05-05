@@ -22,6 +22,15 @@ The single source of truth for **all** creator/influencer/KOL workflows in this 
 
 Before any KOL command runs, the client folder must exist at `/clients/[client-name]/` with `client-brief.md`. If missing, stop and instruct the user to run `/new-client [name]` first. This applies to `/kol-campaign`, `/kol-discovery`, `/kol-outreach`, and `/kol-performance`.
 
+## Status Vocabulary — read before any update_campaign_kol call
+
+The canonical reference for valid `CampaignKOL.status` values is `assets/campaign-kol-statuses.md` in this plugin. Read it before proposing or writing any status. Highlights:
+
+- **Per-KOL status enum depends on `campaign.workflowTemplate`** (`local_store` / `ecommerce_product` / `null`). Each template has its own valid set; `null` means only the seven Common Early Statuses are safe.
+- **Forbidden values** (do NOT use, even if they sound natural): `agreed`, `declined`, `paused`, `posted`, `live`, `concluded`, `negotiating`, `no_response`, `confirmed`, `accepted`, `rejected`, `done`. None of these exist in the merchant code.
+- **Campaign-level status (`draft / active / paused / completed / archived / deleted`) is NOT used reliably** in the merchant code today. Skills must not filter by it, surface it in reports, or make decisions based on it. List campaigns without a status filter; never display the status field to the user.
+- When detecting outreach outcomes that don't have a clean status mapping, update `notes` and `quotes` only — do not propose a `status` change.
+
 ## Bizkol-Native Campaign Rule
 
 **Campaigns live in Bizkol, not on disk.** When the user works with a campaign, the source of truth is the Bizkol MCP. Never create local `/campaigns/[name]/` folders mirroring KOL list, outreach state, or performance — pull live every time.
@@ -30,8 +39,9 @@ What lives on disk:
 - **Campaign index** in `/clients/[name]/client-brief.md` mapping `campaign-name → Bizkol campaignId`. Update this whenever a new campaign is created via `create_campaign`.
 - **Strategic brief** written *before* the Bizkol campaign exists → `/clients/[name]/plans/kol-campaign-brief-[campaign].md`. This is the human-written intent (goals, audience, tier, budget, content angles) that informs `create_campaign` parameters.
 - **One-off generated artifacts** when the user runs a command:
-  - Performance snapshots → `/clients/[name]/audits/kol-performance-[campaign]-[YYYY-MM-DD].md`
-  - Outreach reply drafts → `/clients/[name]/content/drafts/outreach-[campaign]-[YYYY-MM-DD].md`
+  - Performance reports (HTML, daily decision dashboard) → `/clients/[name]/audits/kol-performance-[campaign]-[YYYY-MM-DD].html`
+  - Outreach review (HTML, daily decision dashboard with embedded draft replies + copy buttons) → `/clients/[name]/audits/kol-outreach-[campaign]-[YYYY-MM-DD].html`
+  - Outreach reply drafts (markdown backup for clean copy-paste) → `/clients/[name]/content/drafts/outreach-[campaign]-[YYYY-MM-DD].md`
   - Discovery shortlists → `/clients/[name]/audits/kol-discovery-[topic]-[YYYY-MM-DD].md`
 - **Optional raw API archival** if explicitly requested → `/clients/[name]/raw-data/kol/`
 
@@ -79,15 +89,19 @@ The Bizkol MCP itself is identical in both modes.
 - `/kol-outreach [client] [campaign]` is the single stateful command for the email inbox of a campaign. Idempotent — safe to run ad-hoc or daily.
 - Paginates `list_email_conversations` to handle 500+ KOL campaigns; only fetches `get_email_conversation` bodies for threads with new inbound since the last run.
 - Persistent state at `/clients/[name]/raw-data/kol/outreach-state-[campaign-slug].json` tracks per-thread `lastDraftedForMessageId`, `draftStatus` (`pending_send | sent | superseded | skipped`), and `decision` (`negotiating | agreed | declined | no_response`) — so reruns only redraft when the inbound has actually advanced.
+- **Per-KOL profiles** at `/clients/[name]/raw-data/kol/profiles/[handle].md` capture extracted negotiation facts on every run: quoted price, payment terms, usage rights, exclusivity, timeline, special conditions. Each entry is timestamped and tagged with the source `threadId` + campaign. `Current state` block is overwritten with the latest known values; `Negotiation log` is append-only so prior offers, counters, and decisions stay auditable. Profiles persist across campaigns — the same KOL pulled into a second campaign for the same client adds to the same file.
 - Drafts → `/clients/[name]/content/drafts/outreach-[campaign-slug]-[YYYY-MM-DD].md`.
 - Review report → `/clients/[name]/audits/kol-outreach-[campaign-slug]-[YYYY-MM-DD].md`.
 - Sending always happens in Bizkol's UI; this skill never sends. Pair with `/schedule` for a daily cron.
 
 ### Performance Review
 - `get_campaign_kols` for the per-KOL roster — status, `socialHandles`, `quotes`. This is the spine of the report.
-- For each shipped KOL (status `posted` / `live` / `confirmed` / `completed` / `concluded`): `get_kol_performance` per platform/handle, plus `get_kol_posts`.
-- Aggregate **client-side** to produce totals, per-platform breakdown, top posts, and underperformers.
-- Use `get_social_post_info` for any single-post deep-dive.
+- For each KOL in a "Confirmed cooperation" status (see canonical enum at `assets/campaign-kol-statuses.md`: `confirmation`, `appt_booked`, `store_visited`, `content_created`, `product_sent`, `product_received`, `content_draft`, `content_approved`, `published`, `completed`): `get_kol_performance` per platform/handle, plus `get_kol_posts`.
+- **Always also pull `list_email_conversations` for the campaign** (paginated, metadata-only — no bodies). Compute the outreach funnel: contacted → replied → awaiting-your-reply → converted. Reply rate is the leading indicator and matters most when no posts are live yet. Surface `unreadCount > 0` and `lastMessageSender = "kol"` threads as "hot replies."
+- Aggregate **client-side** to produce totals, per-platform breakdown, top posts, underperformers, and the outreach funnel.
+- **Read per-KOL profile files** at `/clients/[name]/raw-data/kol/profiles/[handle].md` (when present) to join quoted prices and payment terms onto the per-KOL table and into the Hot replies / Awaiting-your-reply tables. These are written by `/kol-outreach`. If absent for a replied KOL, recommend running `/kol-outreach`.
+- Use `get_social_post_info` for any single-post deep-dive. Use `get_email_conversation` only if the user wants a specific thread quoted — bulk reply drafting and profile extraction belong in `/kol-outreach`, not here.
+- If the funnel shows "awaiting your reply" > 0, explicitly recommend `/kol-outreach [client] [campaign]` (and `/schedule` for daily cadence).
 - Report saved to `/clients/[name]/audits/kol-performance-[campaign]-[YYYY-MM-DD].md`.
 
 ## Folder Layout Reminder
@@ -121,4 +135,4 @@ When Bizkol MCP doesn't cover a surface (e.g., LinkedIn creators, Pinterest acco
 - `/kol-discovery` — topic/handle-driven creator search
 - `/kol-campaign` — end-to-end campaign workflow (writes the strategic brief, calls `create_campaign`, updates the index)
 - `/kol-outreach` — stateful email inbox triage for a campaign at scale (500+ KOLs); incremental drafts with per-thread state, idempotent on any cadence
-- `/kol-performance` — per-KOL roster + posts pull, aggregated client-side into a dashboard view + analysis
+- `/kol-performance` — per-KOL roster + posts pull + email outreach funnel (reply rate, hot replies, stale outbound), aggregated client-side into a dashboard view + analysis. Funnel is included on every run, including pre-launch campaigns.

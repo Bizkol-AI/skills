@@ -47,8 +47,8 @@ Parameters:
   description: "<one-line goal + target audience>"
   startDate: "<YYYY-MM-DD>"
   endDate: "<YYYY-MM-DD>"
-  status: "draft"
   settlementCurrency: "USD"  # or CNY, EUR, etc.
+  workflowTemplate: "<local_store | ecommerce_product>"  # pick based on the campaign brief; required for downstream KOL status validation
   tags: ["<platform>", "<creator-tier>", "<vertical>"]
 ```
 

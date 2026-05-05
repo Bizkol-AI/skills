@@ -55,9 +55,9 @@ The registry schema and lifecycle states (`active` / `paused` / `stopped` / `del
 
 ### `--add-from-campaign <campaign-name>`
 
-1. Look up `campaignId` from the client's `client-brief.md` Bizkol Campaign Index. If not indexed, list `active` and `draft` campaigns from Bizkol (two `list_campaigns` calls per the kol-outreach pattern) and let the user pick.
+1. Look up `campaignId` from the client's `client-brief.md` Bizkol Campaign Index. If not indexed, call `list_campaigns` once with no status filter and let the user pick. Campaign-level status (`draft`/`active`/etc.) is unreliable in merchant code — do not filter or display it. See `assets/campaign-kol-statuses.md`.
 2. Call `get_campaign_kols` for the campaign.
-3. For each KOL whose status is `posted` / `live` / `confirmed` / `completed` / `concluded`, call `get_kol_posts(kolId)` and filter to posts created on or after the campaign's `startDate`.
+3. For each KOL in a Confirmed cooperation status (`assets/campaign-kol-statuses.md`: `confirmation`, `appt_booked`, `store_visited`, `content_created`, `product_sent`, `product_received`, `content_draft`, `content_approved`, `published`, `completed`), call `get_kol_posts(kolId)` and filter to posts created on or after the campaign's `startDate`.
 4. For each candidate post:
    - If `postId` already exists in the registry, skip (don't double-track).
    - Otherwise add to `posts[]` with `status: "active"` and the campaign's `campaignId` / `campaignSlug`.
