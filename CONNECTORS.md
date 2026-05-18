@@ -51,22 +51,27 @@ The Bizkol MCP is the **primary data and action source** for all influencer/KOL 
 | `get_kol_posts` | KOL's recent posts with engagement |
 | `search_kols` | Search KOL DB with filters (`query`, `platform`, follower/engagement/price ranges) |
 
-#### Social (live lookups)
+#### Scrapers (live social + reddit lookups)
+
+Bizkol MCP exposes social/reddit scrapers through a generic 3-tool registry. Use `search_scrapers` to discover available scrapers, `get_scraper_details` to read input schemas, and `call_scraper` to execute. Scraper IDs follow `<platform>_<action>` naming.
 
 | Tool | Purpose |
 |------|---------|
-| `get_social_kol_profile` | Live profile for a KOL on a platform (Instagram, TikTok, YouTube, X) |
-| `get_social_post_info` | Live post details + engagement |
-| `search_social_kols` | Discover creators by topic/keyword on a platform |
+| `search_scrapers` | List the 17 available scrapers (filter by id/platform/category). Skip when you already know the scraper ID. |
+| `get_scraper_details` | Fetch a scraper's input JSON Schema + output shape. Skip when you already know the input format. |
+| `call_scraper` | Execute a scraper with `{ scraperId, input }`. Records usage against `mcp_usage`. |
 
-#### Reddit (voice-of-customer)
+**Available scraper IDs** (pass as `scraperId` to `call_scraper`):
 
-| Tool | Purpose |
-|------|---------|
-| `search_reddit` | Search Reddit posts and comments by query |
-| `get_reddit_post` | Full post details including comment tree |
-| `get_reddit_subreddit` | Subreddit metadata, recent posts, subscriber count |
-| `get_reddit_user` | User profile and posting history |
+| Platform | Discovery | Profile | Post | Other |
+|----------|-----------|---------|------|-------|
+| Instagram | `instagram_search_kols` | `instagram_get_profile` | `instagram_get_post` | — |
+| TikTok | `tiktok_search_kols` | `tiktok_get_profile` | `tiktok_get_post` | — |
+| YouTube | `youtube_search_kols` | `youtube_get_profile` | `youtube_get_post` | — |
+| X (Twitter) | `x_search_kols` | `x_get_profile` | `x_get_post` (takes `tweetId`) | — |
+| Reddit | `reddit_search_posts`, `reddit_search_subreddits` | `reddit_get_user` (views: `profile`/`overview`/`top_posts`/`top_comments`/`stats`) | `reddit_get_post` (views: `details`/`comments`) | `reddit_get_subreddit` (views: `info`/`top_posts`/`similar`) |
+
+Reddit-specific scrapers accept a `view` enum to switch between sub-resources. Pagination uses `cursor` / `nextCursor` on list views.
 
 #### Email
 
@@ -86,7 +91,7 @@ The Bizkol MCP is the **primary data and action source** for all influencer/KOL 
 
 ### Bizkol-first rule
 
-For anything KOL-related, **always use Bizkol MCP first** — `search_kols`, `import_kols_to_campaign_by_username`, `get_campaign_kols`, etc. For competitor / VoC research, `search_reddit`, `search_social_kols`, and `get_social_kol_profile` cover most needs without leaving Claude.
+For anything KOL-related, **always use Bizkol MCP first** — `search_kols`, `import_kols_to_campaign_by_username`, `get_campaign_kols`, etc. For competitor / VoC research, use `call_scraper` with the appropriate scraperId (e.g. `reddit_search_posts`, `instagram_search_kols`, `instagram_get_profile`) — these cover most needs without leaving Claude.
 
 ---
 

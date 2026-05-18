@@ -67,8 +67,8 @@ Save raw data to `/clients/$ARGUMENTS/raw-data/competitor/competitor-scan-websit
 ## Step 5: Social and Reputation
 
 **Bizkol MCP — competitor social (Instagram, TikTok, YouTube, X):**
-- `get_social_kol_profile` for each competitor handle on each platform — follower count, recent post engagement
-- `get_social_post_info` for high-engagement recent posts — note posting frequency, content themes, viral / high-performing content
+- `call_scraper` with `<platform>_get_profile` for each competitor handle on each platform — follower count, recent post engagement
+- `call_scraper` with `<platform>_get_post` for high-engagement recent posts — note posting frequency, content themes, viral / high-performing content
 
 For platforms Bizkol doesn't cover (LinkedIn, Pinterest, podcasts), fall back to Chrome.
 
@@ -77,8 +77,8 @@ For platforms Bizkol doesn't cover (LinkedIn, Pinterest, podcasts), fall back to
 - Note rating changes, new review themes, common complaints
 
 **Bizkol MCP — Reddit:**
-- `search_reddit` for competitor brand mentions
-- `get_reddit_post` on top-upvoted threads for full comment context
+- `call_scraper reddit_search_posts` for competitor brand mentions
+- `call_scraper reddit_get_post` (view=`comments`) on top-upvoted threads for full comment context
 - Note sentiment and any trending discussions
 
 Save raw data to `/clients/$ARGUMENTS/raw-data/voc/competitor-scan-social-[YYYY-MM-DD].md`

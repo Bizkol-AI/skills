@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Glob, Grep, WebSearch, TodoWrite, Task
 
 Read the marketing-framework skill and `${CLAUDE_PLUGIN_ROOT}/skills/competitor-research/references/reddit-research-methodology.md` before starting.
 
-> **Connector reference:** See [CONNECTORS.md](../CONNECTORS.md). Primary: **Bizkol MCP** (`search_reddit`, `get_reddit_post`, `get_reddit_subreddit`, `get_reddit_user`) — falls back to standalone Reddit, Twitter, YouTube scrapers for breadth.
+> **Connector reference:** See [CONNECTORS.md](../CONNECTORS.md). Primary: **Bizkol MCP** `call_scraper` with reddit scraperIds (`reddit_search_posts`, `reddit_search_subreddits`, `reddit_get_post`, `reddit_get_subreddit`, `reddit_get_user`) — falls back to standalone Reddit, Twitter, YouTube scrapers for breadth.
 
 Run deep voice-of-customer research via Reddit and social channels for "$ARGUMENTS".
 

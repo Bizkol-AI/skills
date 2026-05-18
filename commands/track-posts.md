@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, TodoWrite, Task
 
 Read the marketing-framework skill and the kol-tracking skill before starting.
 
-> **Connector:** Bizkol MCP (`get_social_post_info`, `get_kol_posts`, `get_campaign_kols`, `get_kol_performance`). All snapshots come from Bizkol; no scraper fallback unless Bizkol returns null/error for a specific post.
+> **Connector:** Bizkol MCP (`call_scraper` with `<platform>_get_post` scraperIds, `get_kol_posts`, `get_campaign_kols`, `get_kol_performance`). All snapshots come from Bizkol; no scraper fallback unless Bizkol returns null/error for a specific post.
 
 `/track-posts` maintains an append-only time-series log of KOL post performance under `/clients/[client-name]/raw-data/kol/`. It pairs with `/schedule` for unattended daily captures.
 
@@ -46,7 +46,7 @@ The registry schema and lifecycle states (`active` / `paused` / `stopped` / `del
 
 ### `--add <url-or-shortcode>`
 
-1. Resolve the URL to `(platform, shortcode, postId)` by calling `get_social_post_info`. If it returns 404, abort and tell the user the post wasn't found.
+1. Resolve the URL to `(platform, shortcode, postId)` by calling `call_scraper` with the platform-appropriate scraperId (`instagram_get_post` / `tiktok_get_post` / `youtube_get_post` / `x_get_post`). If it returns 404 or an empty result, abort and tell the user the post wasn't found.
 2. From the response, extract `kolId`, `handle`, and the post's `postedAt` timestamp.
 3. Ask the user (one short question): which campaign should this post be associated with? Offer options from the client's `client-brief.md` Bizkol Campaign Index plus an `adhoc` option. Resolve to `campaignId` and `campaignSlug`.
 4. Append a new entry to `posts[]` with `status: "active"`, `addedAt` = now, `lastCapturedAt` = null.
@@ -72,8 +72,11 @@ This is the workhorse — designed to be called by `/schedule` on a daily cadenc
 2. Group by `kolId` to amortize follower lookups. For each KOL × platform combination, call `get_kol_performance` once and cache `followersAtCapture` for the run.
 3. For each active post, call:
    ```
-   Tool: get_social_post_info
-   Parameters: { platform: "<platform>", identifier: "<url or shortcode>" }
+   Tool: call_scraper
+   Parameters: { scraperId: "<platform>_get_post", input: { url: "<url>" } }
+                ↑ instagram_get_post / tiktok_get_post take { url }
+                ↑ youtube_get_post takes { identifier } (video ID or watch URL)
+                ↑ x_get_post takes { tweetId } (the numeric ID, not the URL)
    ```
 4. Handle the response:
    - **Success**: compose a snapshot row per the kol-tracking skill schema and append to `/clients/[name]/raw-data/kol/post-history-[campaignSlug].ndjson` (use `post-history-adhoc.ndjson` for `campaignSlug === "adhoc"`). Update the registry entry's `lastCapturedAt`.
@@ -144,7 +147,7 @@ Every action ends with a one-paragraph summary of what changed:
 
 ## Graceful degradation
 
-- **If Bizkol MCP isn't connected:** This command can't run — every snapshot needs `get_social_post_info`. Inform the user.
+- **If Bizkol MCP isn't connected:** This command can't run — every snapshot needs `call_scraper` with a `<platform>_get_post` scraperId. Inform the user.
 - **If a post returns 404:** Auto-set `status: "deleted"`, log it, continue with the rest. The user sees this in the run summary.
 - **If `get_kol_performance` fails for one KOL:** Use the most recent cached `followersAtCapture` from the NDJSON for that handle. If no cached value exists, write the row with `followersAtCapture: null` and rely on `engagementRate = engagementTotal / reach` instead.
 - **If the NDJSON file grows past ~5 MB:** Suggest archiving older entries — `mv post-history-[slug].ndjson post-history-[slug]-archive-[YYYY-MM].ndjson` and start a fresh file. Replay reads both via globbing.

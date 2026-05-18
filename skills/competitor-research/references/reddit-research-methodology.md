@@ -10,9 +10,9 @@ Reddit is one of the most valuable sources of unfiltered customer voice — real
 
 Do NOT summarize or paraphrase during collection. Copy content verbatim. Analysis comes later.
 
-### Step 1: Subreddit Discovery (Bizkol MCP `search_reddit` + `get_reddit_subreddit`)
+### Step 1: Subreddit Discovery (Bizkol MCP `call_scraper` with `reddit_search_subreddits` + `reddit_get_subreddit`)
 
-Use `search_reddit` to find threads, then `get_reddit_subreddit` for details on candidate subreddits. Search queries:
+Use `call_scraper reddit_search_subreddits` (or `reddit_search_posts` to find threads first), then `call_scraper reddit_get_subreddit` (view=`info`) for details on candidate subreddits. Search queries:
 - [primary product/service type]
 - [problem the business solves]
 - [industry/category name]
@@ -24,7 +24,7 @@ Record every relevant subreddit found:
 | Subreddit | Subscribers | Topic Focus | Relevance (High/Med/Low) |
 |-----------|------------|-------------|--------------------------|
 
-### Step 2: Discussion Scraping (Bizkol MCP `search_reddit` + `get_reddit_post`)
+### Step 2: Discussion Scraping (Bizkol MCP `call_scraper` with `reddit_search_posts` + `reddit_get_post`)
 
 Run each of these searches and collect the top 10 posts + top 3 comments per post:
 
@@ -47,7 +47,7 @@ For each post, record:
 - Upvote count
 - Top 3 comments (verbatim — do not paraphrase)
 
-### Step 3: Competitor Reddit Research (Bizkol MCP `search_reddit`)
+### Step 3: Competitor Reddit Research (Bizkol MCP `call_scraper reddit_search_posts`)
 
 For each top competitor:
 - "[competitor name]"
@@ -58,7 +58,7 @@ For each top competitor:
 
 Record the most upvoted threads and comments verbatim — both positive and negative.
 
-### Step 4: Problem & Frustration Threads (Bizkol MCP `search_reddit`)
+### Step 4: Problem & Frustration Threads (Bizkol MCP `call_scraper reddit_search_posts`)
 
 These threads are gold for positioning and messaging. Search:
 - "frustrated with [category]"
@@ -76,7 +76,7 @@ Record the most upvoted complaints and wishes verbatim.
 - Pull comments from the 2-3 most viewed videos
 - Record the 10 most upvoted comments per video
 
-**Twitter/X** (Bizkol MCP `search_social_kols` for relevant accounts; Chrome for keyword search):
+**Twitter/X** (Bizkol MCP `call_scraper x_search_kols` for relevant accounts; Chrome for keyword search):
 - Search "[product/service type]" and "[problem it solves]" via Chrome → x.com search
 - Look for complaint threads and recommendation threads
 - Record notable tweets with high engagement
