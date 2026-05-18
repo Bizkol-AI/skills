@@ -38,10 +38,10 @@ Two related research jobs in one skill: **competitor teardowns** (what competito
 | Competitor traffic estimate | Semrush MCP | — |
 | Competitor Meta ads | Chrome → Meta Ad Library | Live + historical |
 | Competitor Google ads | Chrome → Google Ads Transparency Center | — |
-| Competitor social content | Bizkol MCP `get_social_kol_profile` / `get_social_post_info` | Falls back to Chrome for platforms Bizkol doesn't cover |
+| Competitor social content | Bizkol MCP `call_scraper` with `<platform>_get_profile` / `<platform>_get_post` | Falls back to Chrome for platforms Bizkol doesn't cover |
 | Competitor KOL partnerships | Bizkol MCP `search_kols` filtered by brand mentions; Chrome | — |
 | Reviews + sentiment | Chrome → G2, Trustpilot, Amazon, App Store, Google reviews | — |
-| Reddit VoC | Bizkol MCP `search_reddit`, `get_reddit_post`, `get_reddit_subreddit`, `get_reddit_user` | — |
+| Reddit VoC | Bizkol MCP `call_scraper` with reddit scraperIds (`reddit_search_posts`, `reddit_search_subreddits`, `reddit_get_post`, `reddit_get_subreddit`, `reddit_get_user`) | — |
 | Forum / community VoC | Web search + Chrome | — |
 | Press / PR / podcasts | Web search + Chrome | — |
 

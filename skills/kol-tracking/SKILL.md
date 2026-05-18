@@ -17,7 +17,7 @@ metadata:
 
 # KOL Post Tracking — Time-Series Performance Skill
 
-Bizkol's MCP returns **point-in-time** snapshots: `get_social_post_info`, `get_kol_posts`, and `get_kol_performance` all show whatever the platform reports right now. There is no built-in history. This skill solves that — it captures repeated snapshots into an append-only log and lets you replay the trajectory of any tracked post.
+Bizkol's MCP returns **point-in-time** snapshots: `call_scraper` with `<platform>_get_post`, plus `get_kol_posts` and `get_kol_performance`, all show whatever the platform reports right now. There is no built-in history. This skill solves that — it captures repeated snapshots into an append-only log and lets you replay the trajectory of any tracked post.
 
 > **Read first:** `marketing-framework/SKILL.md` for the client-folder prerequisite, the data-first rule, and the Bizkol-native campaign rule. **Related:** `kol-operations/SKILL.md` for the underlying Bizkol tools used here.
 
@@ -75,8 +75,8 @@ Splitting intent from observations means you can pause a post without losing its
 One JSON object per line. Append-only — never edit existing rows; corrections are new rows with a `correction: true` marker.
 
 ```jsonl
-{"timestamp":"2026-05-02T10:00:00Z","postId":"abc","platform":"tiktok","url":"https://...","kolId":"k1","handle":"@user","campaignId":"camp1","postedAt":"2026-05-01T18:30:00Z","views":12450,"likes":890,"comments":42,"shares":17,"saves":63,"engagementTotal":1012,"reach":12450,"engagementRate":0.0813,"followersAtCapture":245000,"sourceTool":"get_social_post_info"}
-{"timestamp":"2026-05-03T10:00:00Z","postId":"abc","platform":"tiktok","url":"https://...","kolId":"k1","handle":"@user","campaignId":"camp1","postedAt":"2026-05-01T18:30:00Z","views":48200,"likes":3140,"comments":189,"shares":76,"saves":214,"engagementTotal":3619,"reach":48200,"engagementRate":0.0751,"followersAtCapture":245100,"sourceTool":"get_social_post_info"}
+{"timestamp":"2026-05-02T10:00:00Z","postId":"abc","platform":"tiktok","url":"https://...","kolId":"k1","handle":"@user","campaignId":"camp1","postedAt":"2026-05-01T18:30:00Z","views":12450,"likes":890,"comments":42,"shares":17,"saves":63,"engagementTotal":1012,"reach":12450,"engagementRate":0.0813,"followersAtCapture":245000,"sourceTool":"call_scraper:tiktok_get_post"}
+{"timestamp":"2026-05-03T10:00:00Z","postId":"abc","platform":"tiktok","url":"https://...","kolId":"k1","handle":"@user","campaignId":"camp1","postedAt":"2026-05-01T18:30:00Z","views":48200,"likes":3140,"comments":189,"shares":76,"saves":214,"engagementTotal":3619,"reach":48200,"engagementRate":0.0751,"followersAtCapture":245100,"sourceTool":"call_scraper:tiktok_get_post"}
 ```
 
 **Field rules:**
@@ -95,7 +95,7 @@ NDJSON is the right shape because: append-only writes are atomic-enough for this
 1. **Load the registry** at `/clients/[name]/raw-data/kol/tracked-posts.json`. If it doesn't exist, create an empty `{"version":1,"posts":[]}`.
 2. **Resolve which posts to capture** — every `posts[]` entry where `status === "active"`.
 3. **Group by `kolId`** to amortize follower-count lookups: for each KOL, call `get_kol_performance` once per platform (cache `followersAtCapture` for that run).
-4. **For each active post**, call `get_social_post_info` with its `platform` and `url` (or `shortcode`). On 404 / "not found", set the registry entry's `status: "deleted"` and `stopReason: "platform-404"` and skip the append.
+4. **For each active post**, call `call_scraper` with the platform-appropriate scraperId (`instagram_get_post` / `tiktok_get_post` / `youtube_get_post` / `x_get_post`) and the post's URL (or `tweetId` for X, `identifier` for YouTube). On 404 / "not found" / empty result, set the registry entry's `status: "deleted"` and `stopReason: "platform-404"` and skip the append.
 5. **Compose a snapshot row** per the schema above and append it to `post-history-[campaignSlug].ndjson` (or `post-history-adhoc.ndjson` if `campaignSlug === "adhoc"`).
 6. **Update the registry's `lastCapturedAt`** for each successfully captured post.
 7. **Report** at the end: posts captured, posts deleted (auto-stopped), posts that errored (kept active for retry next run), total rows appended.
@@ -143,7 +143,7 @@ Implement via `/schedule` — for example, a routine that runs `/track-posts [cl
 
 | Need | Primary | Fallback |
 |------|---------|----------|
-| Live post engagement snapshot | Bizkol MCP `get_social_post_info` | Chrome on the post URL — read counts manually |
+| Live post engagement snapshot | Bizkol MCP `call_scraper` with `<platform>_get_post` scraperId | Chrome on the post URL — read counts manually |
 | Discover campaign posts to track | Bizkol MCP `get_campaign_kols` + `get_kol_posts` per shipped KOL | — |
 | Refresh follower count for ER denominator | Bizkol MCP `get_kol_performance` | Cached value from last successful refresh |
 

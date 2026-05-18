@@ -1,7 +1,7 @@
 ---
 name: kol-performance
 description: Pull a Bizkol campaign's performance dashboard — aggregated metrics, platform breakdown, top posts, per-KOL performance, and the email outreach funnel (reply rate, hot replies, stale outbound) — and produce a structured performance report. Performance data lives in Bizkol; only the snapshot report is saved locally.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, TodoWrite, mcp__bizkol__list_campaigns, mcp__bizkol__get_campaign, mcp__bizkol__get_campaign_kols, mcp__bizkol__get_kol_performance, mcp__bizkol__get_kol_posts, mcp__bizkol__get_social_post_info, mcp__bizkol__list_email_conversations, mcp__bizkol__get_email_conversation
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, TodoWrite, mcp__bizkol__list_campaigns, mcp__bizkol__get_campaign, mcp__bizkol__get_campaign_kols, mcp__bizkol__get_kol_performance, mcp__bizkol__get_kol_posts, mcp__bizkol__search_scrapers, mcp__bizkol__get_scraper_details, mcp__bizkol__call_scraper, mcp__bizkol__list_email_conversations, mcp__bizkol__get_email_conversation
 ---
 
 # /kol-performance $ARGUMENTS
@@ -65,8 +65,10 @@ Aggregate **client-side** to build the dashboard view:
 For specific posts that need engagement detail:
 
 ```
-Tool: get_social_post_info
-Parameters: { platform: "...", identifier: "<URL or post ID>" }
+Tool: call_scraper
+Parameters: { scraperId: "<platform>_get_post", input: { url: "<URL>" } }
+            ↑ scraperId options: instagram_get_post | tiktok_get_post | youtube_get_post | x_get_post
+            ↑ x_get_post takes { tweetId } instead of { url }; youtube_get_post takes { identifier } (video ID or URL)
 ```
 
 ### Step 3.5 — Pull the email outreach funnel (always run)

@@ -50,14 +50,15 @@ Save the raw results per platform to `/clients/[client-name]/raw-data/kol/discov
 For creators not yet in the Bizkol DB:
 
 ```
-Tool: search_social_kols
+Tool: call_scraper
 Parameters:
-  platform: "<instagram|tiktok|youtube|x>"
-  query: "<topic keyword>"
-  count: 20
+  scraperId: "<platform>_search_kols"  # instagram_search_kols | tiktok_search_kols | youtube_search_kols | x_search_kols
+  input:
+    query: "<topic keyword>"
+    count: 20
 ```
 
-Note: on Instagram, `query` is treated as a hashtag.
+Note: on Instagram (`instagram_search_kols`), `query` is treated as a hashtag.
 
 Save these live results to `/clients/[client-name]/raw-data/kol/discovery-live-[topic-slug]-[platform]-[YYYY-MM-DD].md`.
 
@@ -66,7 +67,7 @@ Save these live results to `/clients/[client-name]/raw-data/kol/discovery-live-[
 For the most promising 10–15 (mix of Bizkol DB + live):
 
 - Bizkol DB candidates: `get_kol`, `get_kol_performance`, `get_kol_posts`
-- Live-only candidates: `get_social_kol_profile`, `get_social_post_info` on a recent post
+- Live-only candidates: `call_scraper` with `<platform>_get_profile`, then `call_scraper` with `<platform>_get_post` on a recent post
 
 ### Step 5 — Score and rank
 

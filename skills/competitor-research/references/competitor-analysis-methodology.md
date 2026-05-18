@@ -67,8 +67,8 @@ Visit each competitor's website and record:
 
 For each competitor's social handles, pull profile + recent posts via Bizkol MCP:
 
-- `get_social_kol_profile` — profile metrics (follower count, post count, bio) per platform (Instagram, TikTok, YouTube, X)
-- `get_social_post_info` — engagement on individual recent posts
+- `call_scraper` with `<platform>_get_profile` — profile metrics (follower count, post count, bio) per platform (Instagram, TikTok, YouTube, X)
+- `call_scraper` with `<platform>_get_post` — engagement on individual recent posts
 - Note content themes, formats, posting frequency, engagement levels
 
 For platforms Bizkol doesn't cover (e.g., LinkedIn company page, Pinterest), use Chrome:
@@ -87,13 +87,13 @@ Search "[competitor name] reviews" and check:
 
 ### Step 8: Reddit Sentiment (Bizkol MCP)
 
-For each competitor, use Bizkol MCP `search_reddit` with these queries:
+For each competitor, use Bizkol MCP `call_scraper reddit_search_posts` with these queries:
 - "[competitor name]"
 - "[competitor name] review"
 - "[competitor name] problems"
 - "[competitor name] vs"
 
-For high-signal threads, drill in with `get_reddit_post` to read full comment trees. Record the most upvoted threads and comments — both positive and negative sentiment.
+For high-signal threads, drill in with `call_scraper reddit_get_post` (view=`comments`) to read full comment trees. Record the most upvoted threads and comments — both positive and negative sentiment.
 
 ## Analysis Phase
 

@@ -81,7 +81,7 @@ Parameters:
   pageSize: 25
 ```
 
-For creators not yet in the Bizkol DB, also run `search_social_kols` (live platform discovery) and pick handles to import.
+For creators not yet in the Bizkol DB, also run `call_scraper` with a `<platform>_search_kols` scraperId (live platform discovery) and pick handles to import.
 
 **B. Known handles** — skip discovery and go straight to import (Step 5).
 

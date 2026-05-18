@@ -117,7 +117,7 @@ One sentence: "Our ideal first customer is [persona], who experiences [trigger e
 **Purpose:** Translate insights and segments into actual messaging and content assets — ready to deploy.
 
 ### Competitor Content Intelligence
-- Pull competitors' top-performing social posts via Bizkol MCP `get_social_kol_profile` / `get_social_post_info` (Instagram, TikTok, YouTube, X) — note hooks, formats, and CTAs
+- Pull competitors' top-performing social posts via Bizkol MCP `call_scraper` with `<platform>_get_profile` / `<platform>_get_post` (Instagram, TikTok, YouTube, X) — note hooks, formats, and CTAs
 - Web search for competitors' blog content, landing page copy, case studies
 - Identify what's working (high engagement) and what's missing (the whitespace)
 

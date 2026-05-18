@@ -51,8 +51,8 @@ For any task, follow this order — never reach for a lower-priority tool when a
 | **Commerce data** (orders, products, customers, inventory, AOV) | Shopify MCP | Chrome → Shopify admin |
 | **Own + competitor SEO** (Authority Score, keywords, backlinks, gaps) | Semrush MCP | Chrome → Google SERP, Search Console |
 | **Competitor ads** | Chrome → Meta Ad Library, Google Ads Transparency Center | — |
-| **Competitor social** | Bizkol MCP `get_social_kol_profile` / `get_social_post_info` | Chrome (LinkedIn, Pinterest, podcasts) |
-| **Voice-of-customer** | Bizkol MCP `search_reddit` and friends | Chrome → forums, reviews |
+| **Competitor social** | Bizkol MCP `call_scraper` with `<platform>_get_profile` / `<platform>_get_post` | Chrome (LinkedIn, Pinterest, podcasts) |
+| **Voice-of-customer** | Bizkol MCP `call_scraper` with reddit scraperIds (`reddit_search_posts`, `reddit_get_post`, …) | Chrome → forums, reviews |
 | **Creative asset generation** | Canva MCP | — |
 
 **The non-negotiables:**

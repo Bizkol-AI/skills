@@ -56,8 +56,7 @@ For any KOL-related task, **start with the Bizkol MCP** at `https://mcp.bizkol.a
 | **Campaigns** | `create_campaign`, `get_campaign`, `list_campaigns`, `update_campaign`, `get_campaign_import_jobs` | Spin up, update, and track campaigns. Dashboard-style aggregates are composed client-side from `get_campaign_kols` + per-KOL calls (see Performance Review workflow). |
 | **Campaign KOLs** | `add_kols_to_campaign`, `get_campaign_kols`, `import_kols_to_campaign_by_username`, `remove_kols_from_campaign`, `update_campaign_kol` | Build the shortlist, import by handle (auto-scrapes new profiles), apply per-KOL status / notes / quotes |
 | **KOL DB** | `search_kols`, `get_kol`, `get_kol_performance`, `get_kol_posts` | Search the Bizkol creator DB; pull profile, performance, recent posts |
-| **Live social** (IG / TikTok / YouTube / X) | `get_social_kol_profile`, `get_social_post_info`, `search_social_kols` | Discover or look up creators not yet in the Bizkol DB |
-| **Reddit** | `search_reddit`, `get_reddit_post`, `get_reddit_subreddit`, `get_reddit_user` | Find Reddit-native creators and high-influence users; surface category-relevant threads, audiences, and VoC for campaign briefs |
+| **Scrapers (live social + reddit)** | `search_scrapers`, `get_scraper_details`, `call_scraper` — scraperIds: `<platform>_search_kols`, `<platform>_get_profile`, `<platform>_get_post` for IG / TikTok / YouTube / X; `reddit_search_posts`, `reddit_search_subreddits`, `reddit_get_user`, `reddit_get_subreddit`, `reddit_get_post` for Reddit | Discover or look up creators not yet in the Bizkol DB, plus Reddit-native creators, threads, and VoC for campaign briefs. See [CONNECTORS.md](../../CONNECTORS.md#scrapers-live-social--reddit-lookups) for the full scraper inventory. |
 | **Email** | `list_email_conversations`, `get_email_conversation` | Read KOL outreach threads (sending happens in Bizkol's UI) |
 | **Account** | `get_billing_status`, `get_invoices`, `get_usage_summary`, `get_user_profile` | Plan, usage, invoices |
 
@@ -75,8 +74,8 @@ The Bizkol MCP itself is identical in both modes.
 ### Discovery → Shortlist → Import
 1. Define the brief: topic, geos, follower band, engagement floor, content style.
 2. **Bizkol DB first:** `search_kols` with the brief. Save raw response (optional) to `/clients/[name]/raw-data/kol/`.
-3. **Live social discovery** for niches Bizkol's DB doesn't cover yet: `search_social_kols` across Instagram / TikTok / YouTube / X.
-4. **Reddit discovery** for community-led categories (B2B, hobbies, niche DTC): `search_reddit` to find category subreddits, then `get_reddit_subreddit` for top contributors and `get_reddit_user` for posting history.
+3. **Live social discovery** for niches Bizkol's DB doesn't cover yet: `call_scraper` with `<platform>_search_kols` (instagram / tiktok / youtube / x).
+4. **Reddit discovery** for community-led categories (B2B, hobbies, niche DTC): `call_scraper reddit_search_subreddits` to find category subreddits, then `call_scraper reddit_get_subreddit` (view=`top_posts`) for top contributors and `call_scraper reddit_get_user` (view=`top_posts` or `overview`) for posting history.
 5. Triage the list against the brand fit criteria from `client-brief.md`.
 6. Write strategic brief to `/clients/[name]/plans/kol-campaign-brief-[campaign].md` (if not already done).
 7. `create_campaign` (or `get_campaign` if continuing).
@@ -100,7 +99,7 @@ The Bizkol MCP itself is identical in both modes.
 - **Always also pull `list_email_conversations` for the campaign** (paginated, metadata-only — no bodies). Compute the outreach funnel: contacted → replied → awaiting-your-reply → converted. Reply rate is the leading indicator and matters most when no posts are live yet. Surface `unreadCount > 0` and `lastMessageSender = "kol"` threads as "hot replies."
 - Aggregate **client-side** to produce totals, per-platform breakdown, top posts, underperformers, and the outreach funnel.
 - **Read per-KOL profile files** at `/clients/[name]/raw-data/kol/profiles/[handle].md` (when present) to join quoted prices and payment terms onto the per-KOL table and into the Hot replies / Awaiting-your-reply tables. These are written by `/kol-outreach`. If absent for a replied KOL, recommend running `/kol-outreach`.
-- Use `get_social_post_info` for any single-post deep-dive. Use `get_email_conversation` only if the user wants a specific thread quoted — bulk reply drafting and profile extraction belong in `/kol-outreach`, not here.
+- Use `call_scraper` with `<platform>_get_post` for any single-post deep-dive. Use `get_email_conversation` only if the user wants a specific thread quoted — bulk reply drafting and profile extraction belong in `/kol-outreach`, not here.
 - If the funnel shows "awaiting your reply" > 0, explicitly recommend `/kol-outreach [client] [campaign]` (and `/schedule` for daily cadence).
 - Report saved to `/clients/[name]/audits/kol-performance-[campaign]-[YYYY-MM-DD].md`.
 
@@ -124,7 +123,7 @@ There is **no `/campaigns/` folder.** Live campaign data is always pulled from B
 
 ## Fallback: Chrome browser
 
-When Bizkol MCP doesn't cover a surface (e.g., LinkedIn creators, Pinterest accounts, podcast hosts) or when a creator isn't returned by `search_social_kols`, fall back to Chrome browser automation:
+When Bizkol MCP doesn't cover a surface (e.g., LinkedIn creators, Pinterest accounts, podcast hosts) or when a creator isn't returned by `call_scraper <platform>_search_kols`, fall back to Chrome browser automation:
 
 - Visit the platform / profile directly.
 - Capture the relevant metrics manually (followers, engagement, recent content, contact info).
